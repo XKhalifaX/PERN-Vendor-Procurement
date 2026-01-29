@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Secrets and Environment Variables
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Docker logs
+.docker
