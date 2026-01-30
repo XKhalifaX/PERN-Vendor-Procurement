@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const pool = require('./db'); 
+const express = require('express'); //dependency
+const cors = require('cors'); //dependency 
+const pool = require('./db'); // this connects to the database
 const app = express(); 
 require('dotenv').config();
 app.use(cors());
@@ -12,7 +12,7 @@ app.put('/api/invoices/:id/status', async (req, res) => {
 
     try {
         
-        const currentData = await pool.query('SELECT status FROM invoices WHERE id = $1', [id]);
+        const currentData = await pool.query('SELECT status FROM invoices WHERE id = $1', [id]); //assigns currentData from a pool query connection connected to db
         
         if (currentData.rows.length === 0) return res.status(404).send('Invoice not found');
         
@@ -36,7 +36,31 @@ app.put('/api/invoices/:id/status', async (req, res) => {
     }
 });
 
+app.post('/api/invoices', async (req, res) => {
+    const { id, vendor_id, amount, currency,description, due_date } = req.body;
+    try {
+        const newInvoice = await pool.query(
+            'INSERT INTO invoices (id, vendor_id, amount, currency, status, description, due_date) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+            [id, vendor_id, amount, currency, 'PENDING', description, due_date]
 
+        );
+await pool.query(
+            'INSERT INTO audit_logs (invoice_id, action, new_value, changed_by) VALUES ($1, $2, $3, $4)',
+            [newInvoice.rows[0].id, 'INVOICE_CREATED', 'PENDING', 'SYSTEM_VENDOR']
+        );
+
+        res.status(201).json(newInvoice.rows[0]); // 201 means "Created Successfuly"
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Database error'); 
+
+    }
+
+});
+
+app.get('/api/audit_logs', async (req, res) => {
+
+});
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
