@@ -4,32 +4,54 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+const [role, setRole] = useState('VENDOR'); // Our "switch" state
+const [formdata, setFormData] = useState({
+  vendor_id: '',
+  amount: '',
+  description: '',
+  currency: '',
+  due_date: ''
+});
+  const handleAction = async () => {
+    console.log("Button clicked! Current input:", formdata);
+
+    alert(`Vendor submitted: ${JSON.stringify(formdata)}`);
+
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+    <div className={role === 'ADMIN' ? 'admin-theme' : 'vendor-theme'}>
+      <nav>
+        <span>Current Role: <strong>{role}</strong></span>
+        <button onClick={() => setRole(role === 'VENDOR' ? 'ADMIN' : 'VENDOR')}>
+          Switch to {role === 'VENDOR' ? 'Admin' : 'Vendor'}
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+      </nav>
 
+      <main>
+        {role === 'VENDOR' ? (
+          <div>
+            <h2>Vendor Dashboard</h2>
+            <div style={{ padding: '20px', border: '1px solid #ccc' }}>
+            <h3>Create Invoice Form</h3>
+            <input
+              type="text"
+              placeholder="Type something."
+              value={formdata.vendor_id}
+              onChange={(e) => setFormData({ ...formdata, vendor_id: e.target.value })} // Link textbox TO variable
+            />
+            <button onClick={handleAction}>Submit</button>
+
+            </div>
+          </div>
+        ) : (
+          <div>
+            <h2>Admin Dashboard</h2>
+            {/* We will put the Approval List here */}
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
 export default App

@@ -57,8 +57,28 @@ await pool.query(
     }
 
 });
+app.get('/api/invoices', async (req, res) => {
+    try {
+        const allInvoices = await pool.query(
+            'SELECT * FROM invoices ORDER BY created_at DESC'
+        );
+        res.json(allInvoices.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Database error');
+    }
+});
 
 app.get('/api/audit_logs', async (req, res) => {
+    try {
+        const allLogs = await pool.query(
+            'SELECT * FROM audit_logs ORDER BY changed_at DESC'
+        );
+        res.json(allLogs.rows);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Database error');
+    }
 
 });
 const PORT = process.env.PORT || 5000;
