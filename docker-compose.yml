@@ -6,12 +6,17 @@ services:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
       POSTGRES_DB: procure_db
+      POSTGRES_HOST_AUTH_METHOD: md5
     ports:
       - "5432:5432"
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
-
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
   api:
     build: ./server
     ports:
@@ -20,6 +25,7 @@ services:
       - ./server:/app
       - /app/node_modules
     environment:
+      
       DATABASE_URL: postgres://user:password@db:5432/procure_db
     depends_on:
       - db
