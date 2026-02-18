@@ -37,11 +37,11 @@ app.put('/api/invoices/:id/status', async (req, res) => {
 });
 
 app.post('/api/invoices', async (req, res) => {
-    const { id, vendor_id, amount, currency,description, due_date } = req.body;
+    const { vendor_id, amount, currency,description, due_date } = req.body;
     try {
         const newInvoice = await pool.query(
-            'INSERT INTO invoices (id, vendor_id, amount, currency, status, description, due_date) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [id, vendor_id, amount, currency, 'PENDING', description, due_date]
+            'INSERT INTO invoices (vendor_id, amount, currency, description, due_date) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [vendor_id, amount, currency, description, due_date]
 
         );
 await pool.query(
