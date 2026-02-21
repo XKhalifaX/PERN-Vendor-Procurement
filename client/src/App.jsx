@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import { Routes, Route, useNavigate } from "react-router-dom";
+import ReviewPage from './Review.jsx';
 
 function App() {
 const [invoices, setInvoices] = useState([]);
@@ -14,6 +14,28 @@ const [formdata, setFormData] = useState({
   currency: '',
   due_date: ''
 });
+const navigate = useNavigate(); //this is used to route to other pages.
+
+const fetchInvoices = async () => {
+  try {
+    const res = await fetch('http://localhost:5000/api/invoices');
+    const data = await res.json();
+    setInvoices(data);
+  } catch (err) {
+    console.error('Error fetching invoices:', err);
+  }
+};
+
+const fetchAudits = async () => {
+  try {
+    const res = await fetch('http://localhost:5000/api/audit_logs');
+    const data = await res.json();
+    setAudits(data);
+  } catch (err) {
+    console.error('Error fetching audits:', err);
+  }
+};
+
 const handleAction = async (e) => {
   e.preventDefault(); //This prevents form submission.
   console.log("Submitting:" , formdata);
@@ -36,9 +58,7 @@ const handleAction = async (e) => {
       const data = await response.json();
       alert("Invoice submitted successfully!");
       setFormData({ ...formdata, amount: '', description: '', currency: '', due_date: '' }); // Clear form after submission
-if (typeof fetchInvoices === 'function') {
-        await fetchInvoices();
-      }
+      await fetchInvoices();
     } else {
       // If the server returns 400 or 500, it hits this ELSE, not the CATCH
       const errorData = await response.json().catch(() => ({}));
@@ -55,22 +75,20 @@ if (typeof fetchInvoices === 'function') {
 
 
 useEffect(() => { //Fetches invoices from backend
-  fetch('http://localhost:5000/api/invoices')
-  .then(res => res.json())
-  .then(data => setInvoices(data))
-  .catch(err => console.error('Error fetching invoices:', err));
+  fetchInvoices();
 }, []) //Means [] Run only once.
 
 useEffect(() => { //Fetching audits from backend
-  fetch('http://localhost:5000/api/audit_logs')
-    .then(res => res.json()) //Parse JSON response
-    .then(data => setAudits(data)) //Set audits state with fetched data
-    .catch(err => console.error('Error fetching audits:', err));
+  fetchAudits();
 }, []);
 
 
 
   return (
+    <Routes>
+      <Route
+        path="/"
+        element={
     <div className="bg-slate-100 min-h-screen w-full flex flex-col items-center">
       <main className="w-full max-w-5xl p-6">
         <div className="mb-6 flex justify-end">
@@ -190,6 +208,13 @@ useEffect(() => { //Fetching audits from backend
                     <p className="mt-2 text-sm text-gray-500 border-t pt-2 border-gray-200/60">
                       {invoice.description}
                     </p>
+                    <div className="mt-2 flex justify-end">
+                      <button
+                      className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                      onClick={() => navigate("/review")}>
+                      Review
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -221,6 +246,10 @@ useEffect(() => { //Fetching audits from backend
         )}
       </main>
     </div>
+    }
+      />
+      <Route path="/review" element={<ReviewPage />} />
+    </Routes>
   );
 }
 export default App
