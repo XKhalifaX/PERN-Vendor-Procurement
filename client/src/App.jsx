@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import ReviewPage from './Review.jsx';
 
 function App() {
 const [invoices, setInvoices] = useState([]);
 const [audits, setAudits] = useState([]);
 const [role, setRole] = useState('VENDOR'); // Our "switch" state
+const navigate = useNavigate(); //this is used to route to other pages.
+const location = useLocation();
 const [formdata, setFormData] = useState({
   vendor_id: 1, // For simplicity, we use a fixed vendor_id. In real app, this would come from auth.
   amount: '',
@@ -14,7 +16,7 @@ const [formdata, setFormData] = useState({
   currency: '',
   due_date: ''
 });
-const navigate = useNavigate(); //this is used to route to other pages.
+
 
 const fetchInvoices = async () => {
   try {
@@ -34,6 +36,20 @@ const fetchAudits = async () => {
   } catch (err) {
     console.error('Error fetching audits:', err);
   }
+};
+
+const getStatusBadgeClasses = (status) => {
+  const normalized = String(status || '').toLowerCase();
+
+  if (normalized === 'approved') {
+    return 'border border-green-200 bg-green-50 text-green-700';
+  }
+
+  if (normalized === 'rejected') {
+    return 'border border-red-200 bg-red-50 text-red-700';
+  }
+
+  return 'border border-gray-200 bg-white text-gray-700';
 };
 
 const handleAction = async (e) => {
@@ -62,7 +78,7 @@ const handleAction = async (e) => {
     } else {
       // If the server returns 400 or 500, it hits this ELSE, not the CATCH
       const errorData = await response.json().catch(() => ({}));
-      alert(`Server rejected submission: ${errorData.details || 'Unknown error'}`);
+      alert(`Server rejected submission: ${errorData.detail || errorData.message || 'Unknown error'}`);
     }
 
   } catch (error) {
@@ -81,6 +97,15 @@ useEffect(() => { //Fetches invoices from backend
 useEffect(() => { //Fetching audits from backend
   fetchAudits();
 }, []);
+
+useEffect(() => {
+  if (location.state?.role === 'ADMIN') {
+    setRole('ADMIN');
+    fetchInvoices();
+    fetchAudits();
+    navigate('/', { replace: true, state: null });
+  }
+}, [location.state, navigate]);
 
 
 
@@ -202,7 +227,11 @@ useEffect(() => { //Fetching audits from backend
                     
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <p className="text-gray-600 font-medium">Vendor: <span className="text-gray-900">{invoice.vendor_id}</span></p>
-                      <p className="text-gray-600 font-medium text-right italic">{invoice.status}</p>
+                      <div className="text-right">
+                        <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold capitalize ${getStatusBadgeClasses(invoice.status)}`}>
+                          {invoice.status}
+                        </span>
+                      </div>
                     </div>
                     
                     <p className="mt-2 text-sm text-gray-500 border-t pt-2 border-gray-200/60">
@@ -211,7 +240,7 @@ useEffect(() => { //Fetching audits from backend
                     <div className="mt-2 flex justify-end">
                       <button
                       className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
-                      onClick={() => navigate("/review")}>
+                      onClick={() => navigate(`/review/${invoice.id}`)}>
                       Review
                       </button>
                     </div>
@@ -232,7 +261,7 @@ useEffect(() => { //Fetching audits from backend
                     <div key={audit.id} className="flex items-center gap-4 p-3 text-sm border-l-4 border-indigo-500 bg-indigo-50/30">
                       <div className="flex-1">
                         <p className="text-gray-900 font-semibold">{audit.action}</p>
-                        <p className="text-gray-500 text-xs text-uppercase font-mono">Invoice #{audit.invoice_id}</p>
+                        <p className="text-gray-500 text-xs uppercase font-mono">Invoice #{audit.invoice_id}</p>
                       </div>
                       <span className="text-gray-400 text-xs">ID: {audit.id}</span>
                     </div>
@@ -248,7 +277,7 @@ useEffect(() => { //Fetching audits from backend
     </div>
     }
       />
-      <Route path="/review" element={<ReviewPage />} />
+      <Route path="/review/:id" element={<ReviewPage />} />
     </Routes>
   );
 }
