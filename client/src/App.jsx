@@ -5,6 +5,7 @@ import ReviewPage from './Review.jsx';
 import Navbar from './components/Navbar.jsx';
 import VendorDash from './components/VendorDash.jsx';
 import AdminDash from './components/AdminDash.jsx';
+import Audit from './components/Audit.jsx';
 import { getInvoices, getAuditLogs } from './components/api.js';
 
 function App() {
@@ -68,13 +69,14 @@ return (
           {role === 'VENDOR' ? (
             <VendorDash fetchInvoices={fetchInvoices} />
           ) : (
-            <AdminDash invoices={invoices} audits={audits} />
+            <AdminDash invoices={invoices} />
           )}
           
         </main>
       </div>
     } />
     <Route path="/review/:id" element={<ReviewPage />} />
+    <Route path="/audit" element={<Audit audits={audits} />} />
   </Routes>
 );
 }

@@ -10,6 +10,11 @@ function VendorDash({ fetchInvoices }) {
     due_date: ''
 });
 const currencyOptions = ['AED','USD', 'EUR', 'GBP', 'JPY', 'AUD', 'CAD']; // Example currency options
+const vendorOptions = [
+  { id: 1, name: 'Surefire Systems' },
+  { id: 2, name: 'Alpha Romeo Incorporated' },
+  { id: 3, name: 'Baladi Logistics' }
+];
 
 const handleAction = async (e) => {
   e.preventDefault(); //This prevents form submission.
@@ -35,6 +40,21 @@ const handleAction = async (e) => {
             <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-700">Create Invoice Form</h3>
+                <label className="flex flex-col gap-2 text-sm font-medium text-gray-700">
+                  Vendor Select:
+                  <select
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    value={formdata.vendor_id}
+                    onChange={(e) => setFormData({ ...formdata, vendor_id: e.target.value })}
+                  >
+                    <option value="" disabled>Select Vendor</option>
+                    {vendorOptions.map((vendor) => (
+                      <option key={vendor.id} value={vendor.id}>
+                        {vendor.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
               </div>
 
               <form onSubmit={handleAction} className="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
