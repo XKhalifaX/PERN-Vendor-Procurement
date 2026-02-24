@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { getInvoiceById, updateInvoiceStatus } from "./components/api.js";
 
 export default function ReviewPage() {
   const navigate = useNavigate();
@@ -12,15 +13,7 @@ export default function ReviewPage() {
 useEffect(() => {
   const fetchInvoice = async () => {
     try {
-      console.log("Review param id:", id);
-      const url = `http://localhost:5000/api/invoices/${id}`;
-      console.log("Fetching:", url);
-
-      const res = await fetch(url);
-      console.log("Status:", res.status);
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
+      const data = await getInvoiceById(id);
       setInvoice(data);
     } catch (err) {
       console.error("Fetch failed:", err);
@@ -35,13 +28,7 @@ useEffect(() => {
 
 const handleAction = async (status) => {
   try {
-    const res = await fetch(`http://localhost:5000/api/invoices/${id}/status`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }) // "approved" or "rejected"
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    await updateInvoiceStatus(id, status);
 
     alert(`Invoice ${status} successfully!`);
     navigate("/", { state: { role: "ADMIN" } });
