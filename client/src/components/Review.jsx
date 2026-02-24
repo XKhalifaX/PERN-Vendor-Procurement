@@ -1,14 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getInvoiceById, updateInvoiceStatus } from "./components/api.js";
+import { getInvoiceById, updateInvoiceStatus } from "./api.js";
 
-export default function ReviewPage() {
+export default function ReviewPage({ vendors }) {
   const navigate = useNavigate();
   const { id } = useParams(); // Get the invoice ID from the URL
   const [invoice, setInvoice] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
 
 useEffect(() => {
   const fetchInvoice = async () => {
@@ -68,6 +67,19 @@ const handleAction = async (status) => {
             {error && <p className="text-red-600">{error}</p>}
             {!loading && !error && invoice && (
               <div className="space-y-4">
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Status:</span> {invoice.status}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Vendor ID:</span> {invoice.vendor_id}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Vendor Name:</span> 
+                  {vendors?.[invoice.vendor_id] || `#${invoice.vendor_id}`}
+                </p>
+                <p className="text-sm text-gray-700">
+                  <span className="font-semibold">Invoice ID:</span> {invoice.id}
+                </p>
                 <p className="text-sm text-gray-700">
                   <span className="font-semibold">Amount:</span> {invoice.amount} {invoice.currency}
                 </p>

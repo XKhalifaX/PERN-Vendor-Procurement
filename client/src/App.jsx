@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import './App.css'
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
-import ReviewPage from './Review.jsx';
+import ReviewPage from './components/Review.jsx';
 import Navbar from './components/Navbar.jsx';
 import VendorDash from './components/VendorDash.jsx';
 import AdminDash from './components/AdminDash.jsx';
@@ -14,7 +14,20 @@ const navigate = useNavigate(); //this is used to route to other pages.
 const location = useLocation();
 const [invoices, setInvoices] = useState([]);
 const [audits, setAudits] = useState([]);
+const [vendors, setVendors] = useState({});
 
+  const fetchVendors = useCallback(async () => {
+  const res = await fetch('http://localhost:5000/vendors');
+  const data = await res.json();
+  const map = {};
+  data.forEach(v => { map[v.id] = v.name; });
+  setVendors(map);
+}, []);
+
+
+useEffect(() => {
+  fetchVendors();
+}, [fetchVendors]);
 
 const fetchInvoices = useCallback(async () => { //Simple getter to fetch invoices
   try {
@@ -35,7 +48,11 @@ const fetchAudits = useCallback(async () => { //Simple getter to fetch audits
 }, []);
 
 
-
+useEffect(() => {
+  if (location.pathname === '/audit' && role !== 'ADMIN') {
+    navigate('/');
+  }
+}, [role, location.pathname, navigate]);
 
 useEffect(() => { //Fetches invoices from backend
   fetchInvoices();
@@ -69,14 +86,25 @@ return (
           {role === 'VENDOR' ? (
             <VendorDash fetchInvoices={fetchInvoices} />
           ) : (
-            <AdminDash invoices={invoices} />
+            <AdminDash invoices={invoices} vendors={vendors} />
           )}
           
         </main>
       </div>
     } />
-    <Route path="/review/:id" element={<ReviewPage />} />
-    <Route path="/audit" element={<Audit audits={audits} />} />
+    <Route
+      path="/audit"
+      element={
+        <div className="bg-slate-100 min-h-screen w-full flex flex-col items-center">
+          <main className="w-full max-w-5xl p-6">
+            <Navbar role={role} setRole={setRole} />
+            <Audit audits={audits} />
+          </main>
+        </div>
+      }
+    />
+
+    <Route path="/review/:id" element={<ReviewPage vendors={vendors} />} />
   </Routes>
 );
 }

@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-function AdminDash({ invoices}) {
+function AdminDash({ invoices, vendors }) {
     const navigate = useNavigate();
     const getStatusBadgeClasses = (status) => {
         const normalized = String(status || '').toLowerCase();
@@ -8,6 +8,15 @@ function AdminDash({ invoices}) {
         if (normalized === 'rejected') return 'border border-red-200 bg-red-50 text-red-700';
         return 'border border-gray-200 bg-white text-gray-700';
     };
+  const formatAmount = (amount) => {
+    const numeric = Number(amount);
+    return Number.isNaN(numeric) ? amount : numeric.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+  const formatDate = (value) => {
+    if (!value) return '—';
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? '—' : parsed.toLocaleDateString();
+  };
 
   return (
         <div className="w-full">
@@ -22,8 +31,14 @@ function AdminDash({ invoices}) {
             
             {/* Approval List Card */}
             <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-700">Approval List</h3>
+                <button
+                  className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                  onClick={() => navigate('/audit')}
+                >
+                  Switch to Audit Log
+                  </button>
               </div>
               
               <div className="p-6 space-y-4">
@@ -34,21 +49,23 @@ function AdminDash({ invoices}) {
                         ID: {invoice.id}
                       </span>
                       <span className="text-sm font-bold text-gray-900">
-                        {invoice.amount} {invoice.currency}
+                        {formatAmount(invoice.amount)} {invoice.currency || 'AED'}
                       </span>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                      <p className="text-gray-600 font-medium">Vendor: <span className="text-gray-900">{invoice.vendor_id}</span></p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                      <p className="text-gray-600 font-medium">Vendor: <span className="text-gray-900">{vendors?.[invoice.vendor_id] || `#${invoice.vendor_id}`}</span></p>
                       <div className="text-right">
                         <span className={`inline-flex rounded-md px-2 py-1 text-xs font-semibold capitalize ${getStatusBadgeClasses(invoice.status)}`}>
                           {invoice.status}
                         </span>
                       </div>
+                      <p className="text-gray-500 text-xs">Due: <span className="text-gray-700 font-medium">{formatDate(invoice.due_date)}</span></p>
+                      <p className="text-gray-500 text-xs text-left sm:text-right">Created: <span className="text-gray-700 font-medium">{formatDate(invoice.created_at)}</span></p>
                     </div>
                     
                     <p className="mt-2 text-sm text-gray-500 border-t pt-2 border-gray-200/60">
-                      {invoice.description}
+                      {invoice.description || 'No description provided.'}
                     </p>
                     <div className="mt-2 flex justify-end">
                       <button

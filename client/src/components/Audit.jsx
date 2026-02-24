@@ -1,11 +1,18 @@
-
+import { useNavigate } from "react-router-dom";
 
 function Audit({ audits }) {
+const navigate = useNavigate();
 
   return (
             <section className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-700">Audit Log</h3>
+                <button
+                  className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+                  onClick={() => navigate('/')}
+                >
+                    Back
+                </button>
               </div>
               
               <div className="p-6">
