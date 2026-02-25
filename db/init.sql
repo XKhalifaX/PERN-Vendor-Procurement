@@ -28,3 +28,17 @@ CREATE TABLE audit_logs (
     changed_by VARCHAR(100),
     changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE idempotency_keys (
+    id BIGSERIAL PRIMARY KEY,
+    idempotency_key VARCHAR(255) NOT NULL,
+    endpoint VARCHAR(120) NOT NULL,
+    request_hash VARCHAR(128) NOT NULL,
+    response_status INTEGER,
+    response_body JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,
+    CONSTRAINT uq_idempotency_key_endpoint UNIQUE (idempotency_key, endpoint)
+);
+
+CREATE INDEX idx_idempotency_expires_at ON idempotency_keys (expires_at);

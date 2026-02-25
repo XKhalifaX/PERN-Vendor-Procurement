@@ -6,7 +6,7 @@ import Navbar from './components/Navbar.jsx';
 import VendorDash from './components/VendorDash.jsx';
 import AdminDash from './components/AdminDash.jsx';
 import Audit from './components/Audit.jsx';
-import { getInvoices, getAuditLogs } from './components/api.js';
+import { getInvoices, getAuditLogs, getVendors } from './components/api.js';
 
 function App() {
 const [role, setRole] = useState('VENDOR'); // Switcher
@@ -17,11 +17,19 @@ const [audits, setAudits] = useState([]);
 const [vendors, setVendors] = useState({});
 
   const fetchVendors = useCallback(async () => {
-  const res = await fetch('http://localhost:5000/vendors');
-  const data = await res.json();
-  const map = {};
-  data.forEach(v => { map[v.id] = v.name; });
-  setVendors(map);
+  try {
+    const data = await getVendors();
+    const map = {};
+    data.forEach(v => {
+      if (v?.id != null && v?.name) {
+        map[String(v.id)] = v.name;
+      }
+    });
+    setVendors(map);
+  } catch (err) {
+    console.error('Error fetching vendors:', err);
+    setVendors({});
+  }
 }, []);
 
 

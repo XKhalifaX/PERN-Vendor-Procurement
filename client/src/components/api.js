@@ -20,15 +20,18 @@ export const getInvoiceById = async (id) => {
 };
 
 export const createInvoice = async (payload) => {
-	const response = await fetch(`${API_BASE_URL}/invoices`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json'
-		},
-		body: JSON.stringify(payload)
-	});
+    const key = crypto.randomUUID();
 
-	return parseJsonResponse(response);
+    const response = await fetch(`${API_BASE_URL}/invoices`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Idempotency-Key': key
+        },
+        body: JSON.stringify(payload)
+    });
+
+    return parseJsonResponse(response);
 };
 
 export const updateInvoiceStatus = async (id, status) => {
@@ -45,5 +48,10 @@ export const updateInvoiceStatus = async (id, status) => {
 
 export const getAuditLogs = async () => {
 	const response = await fetch(`${API_BASE_URL}/audit_logs`);
+	return parseJsonResponse(response);
+};
+
+export const getVendors = async () => {
+	const response = await fetch(`${API_BASE_URL}/vendors`);
 	return parseJsonResponse(response);
 };
